@@ -1,0 +1,32 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+struct planet {
+       float2 position;
+       float2 velocity;
+       float mass; 
+       int attachedPlanets[128];
+};
+/*struct planetBuffer{
+    planet planets[128];
+    float bigG;
+};*/
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+Buffer<planet> planetBuffer;
+float4 mousePos;
+float4 size;
+float4 screen;
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float4 oldPixel = Result[id.xy];
+    // TODO: insert actual code here!
+    float mousex = (mousePos.x);
+    float mousey = (mousePos.y);
+    float dist = sqrt((mousex-screen.x*(id.x/size.x)) * (mousex-screen.x*(id.x/size.x)) + (mousey-screen.y*(id.y/size.y)) * (mousey-screen.y*(id.y/size.y)));
+    float alpha =max(100-dist, 0.0)/100;
+    Result[id.xy] = float4(lerp(oldPixel.r,1.0,alpha), lerp(oldPixel.g,1.0,alpha), lerp(oldPixel.g,1.0,alpha), 0.0);
+
+}
